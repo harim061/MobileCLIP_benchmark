@@ -7,8 +7,12 @@ import random
 import sys
 from copy import copy
 from itertools import product
+import time
 
+import numpy as np
+from clip_benchmark.models import load_clip
 import torch
+from torch.utils.data import DataLoader
 
 from clip_benchmark.datasets.builder import (build_dataset, dataset_collection,
                                              get_dataset_collate_fn,
@@ -65,6 +69,8 @@ def get_parser_args():
     parser_eval.add_argument('--load_clfs', nargs='+', default=[], type=str, help="optionally load and average mutliple layers output by text towers.")
     parser_eval.add_argument('--skip_existing', default=False, action="store_true", help="whether to skip an evaluation if the output file exists.")
     parser_eval.add_argument('--model_type', default="open_clip", type=str, choices=MODEL_TYPES, help="clip model type")
+
+
     parser_eval.add_argument('--wds_cache_dir', default=None, type=str, help="optional cache directory for webdataset only")
     parser_eval.set_defaults(which='eval')
 
@@ -207,8 +213,38 @@ def _single_option_to_multiple_datasets(cur_option, datasets, name):
     else:
         return cur_option
 
+
+def get_sample_from_dataset(dataset, device):
+    sample = next(iter(dataset))
+    
+    if isinstance(sample, (tuple, list)):
+        image = sample[0].unsqueeze(0).to(device)  
+        text = sample[1] if len(sample) > 1 else ["a sample text"]
+    elif isinstance(sample, dict):
+        image = sample['image'].unsqueeze(0).to(device)  
+        text = sample.get('text', ["a sample text"])
+    else:
+        image = sample.unsqueeze(0).to(device)  
+        text = "a sample text"
+    
+    if isinstance(text, list):
+        text = text[0] if text else "a sample text"
+    
+    text = str(text)
+    
+    return image, text
+
+# ! FPS 측정 함수 수정
+def measure_fps(model_part, sample, num_iterations=100):
+    fps_list = []
+    for _ in range(num_iterations):
+        start_time = time.time()
+        _ = model_part(sample)
+        end_time = time.time()
+        fps_list.append(1 / (end_time - start_time))
+    return np.mean(fps_list)
+
 def run(args):
-    """Console script for clip_benchmark."""
     if torch.cuda.is_available():
         if args.distributed:
             local_rank, rank, world_size = world_info_from_env()
@@ -249,10 +285,16 @@ def run(args):
     if args.skip_load:
         model, transform, collate_fn, dataloader = None, None, None, None
     else:
+        # ! mobile_clip을 위한 처리 추가
+        if args.model_type == "mobile_clip":
+            pretrained = args.pretrained
+        else:
+            pretrained = args.pretrained if os.path.isfile(args.pretrained) else None
+
         model, transform, tokenizer = load_clip(
             model_type=args.model_type,
             model_name=args.model,
-            pretrained=args.pretrained,
+            pretrained=pretrained,
             cache_dir=args.model_cache_dir,
             device=args.device
         )
@@ -300,6 +342,25 @@ def run(args):
                 shuffle=False, num_workers=args.num_workers, 
                 collate_fn=collate_fn
             )
+            
+    sample_image, sample_text = get_sample_from_dataset(dataset, args.device)
+    tokenized_sample_text = tokenizer(sample_text)
+    tokenized_sample_text = tokenized_sample_text.to(device)
+
+    # !FPS 측정
+    with torch.no_grad(), torch.cuda.amp.autocast():
+        image_encoder_fps = measure_fps(model.encode_image, sample_image)
+        text_encoder_fps = measure_fps(model.encode_text, tokenized_sample_text)
+        # text_encoder_fps = measure_fps(model.encode_text, sample_text)
+
+    fps_info = {
+        "image_encoder_fps": image_encoder_fps,
+        "text_encoder_fps": text_encoder_fps
+    }
+    
+    total_start_time = time.time()
+    
+
     if task == "zeroshot_classification":
         zeroshot_templates = dataset.templates if hasattr(dataset, "templates") else None
         if args.verbose:
@@ -317,6 +378,7 @@ def run(args):
             save_clf=args.save_clf,
             load_clfs=args.load_clfs,
         ) 
+        metrics.update(fps_info)
     elif task == "zeroshot_retrieval":
         metrics = zeroshot_retrieval.evaluate(
             model, 
@@ -326,6 +388,8 @@ def run(args):
             device=args.device, 
             amp=args.amp
         )
+        metrics.update(fps_info)
+        
     elif task == "image_caption_selection":
         metrics = image_caption_selection.evaluate(
             model,
@@ -334,6 +398,8 @@ def run(args):
             device=args.device,
             amp=args.amp,
         )
+        metrics.update(fps_info)
+        
     elif task == "linear_probe":
         # we also need the train and validation splits for linear probing.
         train_dataset = None
@@ -389,6 +455,8 @@ def run(args):
             amp=args.amp,
             verbose=args.verbose,
         )
+        metrics.update(fps_info)
+
     elif task == "captioning":
         metrics = captioning.evaluate(
             model=model, 
@@ -400,16 +468,28 @@ def run(args):
             verbose=args.verbose,
             transform=transform
         )
+        metrics.update(fps_info)
+        
     else:
         raise ValueError("Unsupported task: {}. task should be `zeroshot_classification`, `zeroshot_retrieval`, `linear_probe`, or `captioning`".format(task))
+
+    # !전체 평가 시간 측정 및 총 FPS 계산
+    total_end_time = time.time()
+    total_time = total_end_time - total_start_time
+    fps_info["total_fps"] = len(dataset) / total_time if hasattr(dataset, '__len__') else None
+    metrics.update({"total_fps": fps_info["total_fps"]})
+    
     dump = {
         "dataset": args.dataset,
         "model": args.model,
-        "pretrained": args.pretrained,
+        "pretrained": args.pretrained if args.model_type == "mobile_clip" else pretrained_slug,
         "task": task,
         "metrics": metrics,
         "language": args.language,
+        "fps_info": fps_info
     }
+    
+    
     if hasattr(dataset, "classes") and dataset.classes and args.dump_classnames:
         dump["classnames"] = dataset.classes
     if hasattr(dataset, "templates") and dataset.templates and args.dump_templates:

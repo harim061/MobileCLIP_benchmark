@@ -1,5 +1,45 @@
+
 # CLIP Benchmark
 [![pypi](https://img.shields.io/pypi/v/clip_benchmark.svg)](https://pypi.python.org/pypi/clip_benchmark)
+
+
+# Benchmark 실행하기
+## Setup
+```
+conda create -n clip-benchmark python=3.10
+conda activate clip-benchmark
+pip install clip-benchmark
+pip install git+https://github.com/apple/ml-mobileclip.git
+```
+## Get datasets
+```
+wget https://raw.githubusercontent.com/LAION-AI/CLIP_benchmark/main/benchmark/webdatasets.txt
+```
+
+## Checkpoint
+
+| Model             |   # Seen <BR>Samples (B)   | # Params (M) <BR> (img + txt) | Latency (ms) <BR> (img + txt)  | IN-1k Zero-Shot <BR> Top-1 Acc. (%) | Avg. Perf. (%) <BR> on 38 datasets |                                            Pytorch Checkpoint (url)                                            |
+|:------------------|:----------------------:|:-----------------------------:|:------------------------------:|:-----------------------------------:|:----------------------------------:|:--------------------------------------------------------------------------------------------------------------:|
+| MobileCLIP-S0     |           13           |          11.4 + 42.4          |           1.5 + 1.6            |                67.8                 |                58.1                |  [mobileclip_s0.pt](https://docs-assets.developer.apple.com/ml-research/datasets/mobileclip/mobileclip_s0.pt)  |
+| MobileCLIP-S1     |           13           |          21.5 + 63.4          |           2.5 + 3.3           |                72.6                 |                61.3                |  [mobileclip_s1.pt](https://docs-assets.developer.apple.com/ml-research/datasets/mobileclip/mobileclip_s1.pt)  |
+| MobileCLIP-S2     |           13           |          35.7 + 63.4          |           3.6 + 3.3           |                74.4                 |                63.7                |  [mobileclip_s2.pt](https://docs-assets.developer.apple.com/ml-research/datasets/mobileclip/mobileclip_s2.pt)  |
+
+## Run
+```
+clip_benchmark eval \
+    --model_type "mobile_clip" \
+    --model "mobileclip_s2" \
+    --dataset "webdatasets.txt" \
+    --dataset_root "https://huggingface.co/datasets/clip-benchmark/wds_{dataset_cleaned}/tree/main" \
+    --output "/root/code/harim/DeepDaiv/CLIP_benchmark/benchmark_mobileclip_{dataset}_{pretrained}_{model}_{language}_{task}.json"
+```
+- 경로 확인하기 
+
+## CSV 확인하기
+```
+clip_benchmark build benchmark_*.json --output benchmark.csv
+```
+---
 
 The goal of this repo is to evaluate CLIP-like models on a standard set
 of datasets on different tasks such as zero-shot classification and zero-shot

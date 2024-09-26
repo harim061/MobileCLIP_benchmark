@@ -1,0 +1,2 @@
+mobileclip_s0,mobileclip_s0
+ViT-B-32,openai
