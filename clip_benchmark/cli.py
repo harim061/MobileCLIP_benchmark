@@ -378,7 +378,7 @@ def run(args):
             save_clf=args.save_clf,
             load_clfs=args.load_clfs,
         ) 
-        metrics.update(fps_info)
+        
     elif task == "zeroshot_retrieval":
         metrics = zeroshot_retrieval.evaluate(
             model, 
@@ -388,7 +388,7 @@ def run(args):
             device=args.device, 
             amp=args.amp
         )
-        metrics.update(fps_info)
+        
         
     elif task == "image_caption_selection":
         metrics = image_caption_selection.evaluate(
@@ -398,7 +398,7 @@ def run(args):
             device=args.device,
             amp=args.amp,
         )
-        metrics.update(fps_info)
+        
         
     elif task == "linear_probe":
         # we also need the train and validation splits for linear probing.
@@ -455,7 +455,7 @@ def run(args):
             amp=args.amp,
             verbose=args.verbose,
         )
-        metrics.update(fps_info)
+        
 
     elif task == "captioning":
         metrics = captioning.evaluate(
@@ -468,16 +468,12 @@ def run(args):
             verbose=args.verbose,
             transform=transform
         )
-        metrics.update(fps_info)
+       
         
     else:
         raise ValueError("Unsupported task: {}. task should be `zeroshot_classification`, `zeroshot_retrieval`, `linear_probe`, or `captioning`".format(task))
 
-    # !전체 평가 시간 측정 및 총 FPS 계산
-    total_end_time = time.time()
-    total_time = total_end_time - total_start_time
-    fps_info["total_fps"] = len(dataset) / total_time if hasattr(dataset, '__len__') else None
-    metrics.update({"total_fps": fps_info["total_fps"]})
+   
     
     dump = {
         "dataset": args.dataset,

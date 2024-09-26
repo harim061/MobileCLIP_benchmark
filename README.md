@@ -39,6 +39,11 @@ clip_benchmark eval \
 ```
 clip_benchmark build benchmark_*.json --output benchmark.csv
 ```
+## 결과
+```
+{"dataset": "wds/mscoco_captions", "model": "mobileclip_s2", "pretrained": "laion400m_e32", "task": "zeroshot_retrieval", "metrics": {"image_retrieval_recall@5": 0.699640154838562, "text_retrieval_recall@5": 0.850600004196167}, "language": "en", "fps_info": {"image_encoder_fps": 22.580960026287727, "text_encoder_fps": 64.56733175683543}}
+```
+
 ---
 
 The goal of this repo is to evaluate CLIP-like models on a standard set
