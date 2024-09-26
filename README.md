@@ -10,6 +10,7 @@ conda create -n clip-benchmark python=3.10
 conda activate clip-benchmark
 pip install clip-benchmark
 pip install git+https://github.com/apple/ml-mobileclip.git
+pip install .
 ```
 ## Get datasets
 ```
