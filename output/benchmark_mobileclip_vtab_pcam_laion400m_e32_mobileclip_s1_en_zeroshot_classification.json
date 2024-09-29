@@ -1,0 +1,1 @@
+{"dataset": "wds/vtab/pcam", "model": "mobileclip_s1", "pretrained": "laion400m_e32", "task": "zeroshot_classification", "metrics": {"acc1": 0.500213623046875, "acc5": NaN, "mean_per_class_recall": 0.5}, "language": "en", "fps_info": {"image_encoder_fps": 861.0872477596279, "text_encoder_fps": 4478.401273664735}}

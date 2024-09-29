@@ -1,0 +1,1 @@
+{"dataset": "wds/vtab/diabetic_retinopathy", "model": "mobileclip_s1", "pretrained": "laion400m_e32", "task": "zeroshot_classification", "metrics": {"acc1": 0.14722287321303024, "acc5": 1.0, "mean_per_class_recall": 0.2}, "language": "en", "fps_info": {"image_encoder_fps": 874.6976736376795, "text_encoder_fps": 4565.623369302115}}

@@ -29,7 +29,7 @@ wget https://raw.githubusercontent.com/LAION-AI/CLIP_benchmark/main/benchmark/we
 ```
 clip_benchmark eval \
     --model_type "mobile_clip" \
-    --model "mobileclip_s2" \
+    --model "mobileclip_s1" \
     --dataset "webdatasets.txt" \
     --dataset_root "https://huggingface.co/datasets/clip-benchmark/wds_{dataset_cleaned}/tree/main" \
     --output "/root/code/harim/DeepDaiv/CLIP_benchmark/benchmark_mobileclip_{dataset}_{pretrained}_{model}_{language}_{task}.json"

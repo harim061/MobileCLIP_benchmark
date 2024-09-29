@@ -15,8 +15,11 @@ wds/sun397
 wds/cars
 wds/fgvc_aircraft
 wds/mnist
+wds/stl10 x
+wds/gtsrb x 
 wds/country211
 wds/renderedsst2
+wds/vtab/caltech101 x
 wds/vtab/cifar10
 wds/vtab/cifar100
 wds/vtab/clevr_count_all
@@ -26,7 +29,13 @@ wds/vtab/dmlab
 wds/vtab/dsprites_label_orientation
 wds/vtab/dsprites_label_x_position
 wds/vtab/dsprites_label_y_position
+wds/vtab/dtd x
+wds/vtab/eurosat x
+wds/vtab/kitti_closest_vehicle_distance x
+wds/vtab/flowers x
+wds/vtab/pets x 
 wds/vtab/pcam
+wds/vtab/resisc45 x
 wds/vtab/smallnorb_label_azimuth
 wds/vtab/smallnorb_label_elevation
 wds/vtab/svhn

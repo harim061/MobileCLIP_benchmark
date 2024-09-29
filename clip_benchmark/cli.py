@@ -45,6 +45,7 @@ def get_parser_args():
     parser_eval.add_argument('--task', type=str, default="auto", choices=["zeroshot_classification", "zeroshot_retrieval", "linear_probe", "captioning", "image_caption_selection", "auto"], help="Task to evaluate on. With --task=auto, the task is automatically inferred from the dataset.")
     parser_eval.add_argument('--no_amp', action="store_false", dest="amp", default=True, help="whether to use mixed precision")
     parser_eval.add_argument('--num_workers', default=4, type=int)
+    parser_eval.add_argument('--image_encoder_id', default=None, type=str)
     parser_eval.add_argument('--recall_k', default=[5], type=int, help="for retrieval, select the k for Recall@K metric. ", nargs="+",)
     parser_eval.add_argument('--fewshot_k', default=-1, type=int, help="for linear probe, how many shots. -1 = whole dataset.")
     parser_eval.add_argument('--fewshot_epochs', default=10, type=int, help="for linear probe, how many epochs.")
@@ -52,7 +53,7 @@ def get_parser_args():
     parser_eval.add_argument("--skip_load", action="store_true", help="for linear probes, when everything is cached, no need to load model.")
     parser_eval.add_argument("--distributed", action="store_true", help="evaluation in parallel")
     parser_eval.add_argument('--seed', default=0, type=int, help="random seed.")
-    parser_eval.add_argument('--batch_size', default=64, type=int)
+    parser_eval.add_argument('--batch_size', default=128, type=int)
     parser_eval.add_argument('--normalize', default=True, type=bool, help="features normalization")
     parser_eval.add_argument('--model_cache_dir', default=None, type=str, help="directory to where downloaded models are cached")
     parser_eval.add_argument('--feature_root', default="features", type=str, help="feature root folder where the features are stored.")
@@ -234,15 +235,7 @@ def get_sample_from_dataset(dataset, device):
     
     return image, text
 
-# ! FPS 측정 함수 수정
-def measure_fps(model_part, sample, num_iterations=100):
-    fps_list = []
-    for _ in range(num_iterations):
-        start_time = time.time()
-        _ = model_part(sample)
-        end_time = time.time()
-        fps_list.append(1 / (end_time - start_time))
-    return np.mean(fps_list)
+
 
 def run(args):
     if torch.cuda.is_available():
@@ -288,16 +281,31 @@ def run(args):
         # ! mobile_clip을 위한 처리 추가
         if args.model_type == "mobile_clip":
             pretrained = args.pretrained
+        elif args.model_type =='mobileMLiT':
+            pretrained = args.pretrained
+            image_encoder_id = args.image_encoder_id if hasattr(args, 'image_encoder_id') else 'nvidia/MambaVision-T-1K'
         else:
             pretrained = args.pretrained if os.path.isfile(args.pretrained) else None
 
-        model, transform, tokenizer = load_clip(
-            model_type=args.model_type,
-            model_name=args.model,
-            pretrained=pretrained,
-            cache_dir=args.model_cache_dir,
-            device=args.device
-        )
+
+        if args.model_type == "mobileMLiT":
+            model, transform, tokenizer = load_clip(
+                model_type=args.model_type,
+                model_name=args.model,
+                 pretrained=None,
+                cache_dir=args.model_cache_dir,
+                device=args.device,
+                image_encoder_id=image_encoder_id
+            )
+        else:
+            model, transform, tokenizer = load_clip(
+                model_type=args.model_type,
+                model_name=args.model,
+                pretrained=pretrained,
+                cache_dir=args.model_cache_dir,
+                device=args.device
+            )
+
         model.eval()
         if args.model.count("nllb-clip") > 0:
             # for NLLB-CLIP models, we need to set the language prior to running the tests
@@ -343,23 +351,84 @@ def run(args):
                 collate_fn=collate_fn
             )
             
-    sample_image, sample_text = get_sample_from_dataset(dataset, args.device)
-    tokenized_sample_text = tokenizer(sample_text)
-    tokenized_sample_text = tokenized_sample_text.to(device)
+    # ! batch
+    sample_images, sample_texts = [], []
+    
+    for i,batch  in enumerate(dataloader):
+        if i >= 128 // args.batch_size:
+            break
+       
+        # print(f"Batch {i}:")
+        # print("Sample texts type:", type(sample_texts))
+        # print("Sample texts length:", len(sample_texts))
+        # print("First item in batch:", text[0] if len(text) > 0 else "Empty")
+        # print("First item type:", type(text[0]) if len(text) > 0 else "Empty")
+        # print("First few items in batch:", text[:5] if len(text) > 0 else "Empty")
+        # print("\n")
+        image, text = batch
+    
+        sample_images.extend(image)
+        
+        if isinstance(text, torch.Tensor):
+            if text.dim() == 0:  # 0-d tensor
+                sample_texts.append(str(text.item()))
+            else:
+                sample_texts.extend(map(str, text.tolist()))
+        elif isinstance(text, list):
+            sample_texts.extend(map(str, text))
+        else:
+            raise TypeError(f"Unexpected text type: {type(text)}")
+        
+    sample_images = torch.stack(sample_images)
+    
+    sample_texts = [str(text) for text in sample_texts]
+    
+    sample_texts = tokenizer(sample_texts).to(device)
 
     # !FPS 측정
-    with torch.no_grad(), torch.cuda.amp.autocast():
-        image_encoder_fps = measure_fps(model.encode_image, sample_image)
-        text_encoder_fps = measure_fps(model.encode_text, tokenized_sample_text)
-        # text_encoder_fps = measure_fps(model.encode_text, sample_text)
-
+    with torch.no_grad(), torch.cuda.amp.autocast(dtype=torch.float16):
+        image_encoder_ms = []
+        text_encoder_ms = []
+        
+        images = sample_images.half().to(device)
+        start, end = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
+    
+        for _ in range(100):
+            
+            start.record()
+            image_features = model.encode_image(images)
+            end.record()
+            
+            torch.cuda.synchronize()
+            image_encoder_ms.append(start.elapsed_time(end))
+        
+            start.record()
+            text_features = model.encode_text(sample_texts )
+            end.record()
+            
+            torch.cuda.synchronize()
+            text_encoder_ms.append(start.elapsed_time(end))
+            
+        image_features = model.encode_image(images)
+        text_features = model.encode_text(sample_texts)
+        image_features /= image_features.norm(dim=-1, keepdim=True)
+        text_features /= text_features.norm(dim=-1, keepdim=True)
+        text_probs = (100.0 * image_features @ text_features.T).softmax(dim=-1)
+        
+        
+        image_batch_size = images.size(0)
+        text_batch_size = len(sample_texts)
+        
+        image_encoder_fps = 1000 * image_batch_size / (sum(image_encoder_ms) / len(image_encoder_ms))
+        text_encoder_fps = 1000 * text_batch_size / (sum(text_encoder_ms) / len(text_encoder_ms))
+        
+        
     fps_info = {
         "image_encoder_fps": image_encoder_fps,
         "text_encoder_fps": text_encoder_fps
     }
     
-    total_start_time = time.time()
-    
+
 
     if task == "zeroshot_classification":
         zeroshot_templates = dataset.templates if hasattr(dataset, "templates") else None

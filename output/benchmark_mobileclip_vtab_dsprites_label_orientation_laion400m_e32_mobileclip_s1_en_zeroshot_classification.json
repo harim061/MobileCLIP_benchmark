@@ -1,0 +1,1 @@
+{"dataset": "wds/vtab/dsprites_label_orientation", "model": "mobileclip_s1", "pretrained": "laion400m_e32", "task": "zeroshot_classification", "metrics": {"acc1": 0.025539822048611112, "acc5": 0.1251220703125, "mean_per_class_recall": 0.025}, "language": "en", "fps_info": {"image_encoder_fps": 886.29704977693, "text_encoder_fps": 4578.822354784099}}

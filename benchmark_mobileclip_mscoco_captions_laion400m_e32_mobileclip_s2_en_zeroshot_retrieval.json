@@ -1,1 +1,0 @@
-{"dataset": "wds/mscoco_captions", "model": "mobileclip_s2", "pretrained": "laion400m_e32", "task": "zeroshot_retrieval", "metrics": {"image_retrieval_recall@5": 0.699640154838562, "text_retrieval_recall@5": 0.850600004196167}, "language": "en", "fps_info": {"image_encoder_fps": 24.264741790334416, "text_encoder_fps": 75.61060371977435}}
