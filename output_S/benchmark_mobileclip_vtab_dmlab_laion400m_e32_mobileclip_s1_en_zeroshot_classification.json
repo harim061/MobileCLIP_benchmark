@@ -1,0 +1,1 @@
+{"dataset": "wds/vtab/dmlab", "model": "mobileclip_s1", "pretrained": "laion400m_e32", "task": "zeroshot_classification", "metrics": {"acc1": 0.17734770178139433, "acc5": 0.8144270947877722, "mean_per_class_recall": 0.16666666666666666}, "language": "en", "fps_info": {"image_encoder_fps": 871.4799530214514, "text_encoder_fps": 4560.948601155202}}

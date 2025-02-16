@@ -1,1 +1,0 @@
-{"dataset": "wds/vtab/clevr_count_all", "model": "mobileclip_s1", "pretrained": "laion400m_e32", "task": "zeroshot_classification", "metrics": {"acc1": 0.12053333333333334, "acc5": 0.6246, "mean_per_class_recall": 0.125}, "language": "en", "fps_info": {"image_encoder_fps": 871.4358412227543, "text_encoder_fps": 4553.609905164193}}

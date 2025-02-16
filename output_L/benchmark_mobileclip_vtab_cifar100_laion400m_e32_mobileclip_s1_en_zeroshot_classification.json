@@ -1,0 +1,1 @@
+{"dataset": "wds/vtab/cifar100", "model": "mobileclip_s1", "pretrained": "laion400m_e32", "task": "zeroshot_classification", "metrics": {"acc1": 0.01, "acc5": 0.0481, "mean_per_class_recall": 0.01}, "language": "en", "fps_info": {"image_encoder_fps": 866.9677765408696, "text_encoder_fps": 4530.761234634608}}

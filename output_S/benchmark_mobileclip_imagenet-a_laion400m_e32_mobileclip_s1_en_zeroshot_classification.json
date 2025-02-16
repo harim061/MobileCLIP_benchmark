@@ -1,0 +1,1 @@
+{"dataset": "wds/imagenet-a", "model": "mobileclip_s1", "pretrained": "laion400m_e32", "task": "zeroshot_classification", "metrics": {"acc1": 0.0018666666666666666, "acc5": 0.008266666666666667, "mean_per_class_recall": 0.005}, "language": "en", "fps_info": {"image_encoder_fps": 873.1884378469307, "text_encoder_fps": 4494.013670224104}}

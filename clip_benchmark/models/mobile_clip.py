@@ -11,6 +11,7 @@ def load_mobile_clip(model_name: str = "mobileclip_s1", pretrained: str = None, 
     print(f"사용 장치: {device}")
     try:
         if pretrained:
+            print(pretrained)
             model, _, transform = mobileclip.create_model_and_transforms(model_name, pretrained=pretrained)
                   
         else:

@@ -1,1 +1,0 @@
-{"dataset": "wds/flickr30k", "model": "mobileclip_s1", "pretrained": "laion400m_e32", "task": "zeroshot_retrieval", "metrics": {"image_retrieval_recall@5": 0.003800000064074993, "text_retrieval_recall@5": 0.004999999888241291}, "language": "en", "fps_info": {"image_encoder_fps": 869.8203108446111, "text_encoder_fps": 4541.509057669353}}

@@ -1,0 +1,1 @@
+{"dataset": "wds/cars", "model": "mobileclip_s1", "pretrained": "laion400m_e32", "task": "zeroshot_classification", "metrics": {"acc1": 0.005223230941425196, "acc5": 0.025618704141275962, "mean_per_class_recall": 0.00510204081632653}, "language": "en", "fps_info": {"image_encoder_fps": 874.976532604381, "text_encoder_fps": 4575.014329237201}}

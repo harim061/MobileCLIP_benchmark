@@ -1,0 +1,1 @@
+{"dataset": "wds/vtab/smallnorb_label_azimuth", "model": "mobileclip_s1", "pretrained": "laion400m_e32", "task": "zeroshot_classification", "metrics": {"acc1": 0.058189300411522635, "acc5": 0.27901234567901234, "mean_per_class_recall": 0.05555555555555555}, "language": "en", "fps_info": {"image_encoder_fps": 869.7297618480712, "text_encoder_fps": 4544.3164987363525}}

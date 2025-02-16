@@ -1,1 +1,0 @@
-{"dataset": "wds/fgvc_aircraft", "model": "mobileclip_s1", "pretrained": "laion400m_e32", "task": "zeroshot_classification", "metrics": {"acc1": 0.009600960096009602, "acc5": 0.04980498049804981, "mean_per_class_recall": 0.009696969696969697}, "language": "en", "fps_info": {"image_encoder_fps": 873.0766076459769, "text_encoder_fps": 4567.311991429691}}

@@ -1,1 +1,0 @@
-{"dataset": "wds/voc2007_multilabel", "model": "mobileclip_s1", "pretrained": "laion400m_e32", "task": "zeroshot_classification", "metrics": {"mean_average_precision": 0.08138900995254517}, "language": "en", "fps_info": {"image_encoder_fps": 870.4820032406916, "text_encoder_fps": 4548.126313770228}}

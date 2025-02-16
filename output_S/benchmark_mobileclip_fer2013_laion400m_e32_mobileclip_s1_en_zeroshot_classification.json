@@ -1,0 +1,1 @@
+{"dataset": "wds/fer2013", "model": "mobileclip_s1", "pretrained": "laion400m_e32", "task": "zeroshot_classification", "metrics": {"acc1": 0.13346336026748398, "acc5": 0.6830593480078017, "mean_per_class_recall": 0.14285714285714285}, "language": "en", "fps_info": {"image_encoder_fps": 879.0253797216316, "text_encoder_fps": 4576.843574199638}}

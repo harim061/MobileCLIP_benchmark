@@ -1,0 +1,1 @@
+{"dataset": "wds/country211", "model": "mobileclip_s1", "pretrained": "laion400m_e32", "task": "zeroshot_classification", "metrics": {"acc1": 0.004739336492890996, "acc5": 0.023696682464454975, "mean_per_class_recall": 0.004739336492890996}, "language": "en", "fps_info": {"image_encoder_fps": 872.8999144959315, "text_encoder_fps": 4561.813733232632}}

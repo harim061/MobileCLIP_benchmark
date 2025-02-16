@@ -14,7 +14,6 @@ wds/voc2007_multilabel
 wds/sun397
 wds/cars
 wds/fgvc_aircraft
-wds/mnist
 wds/country211
 wds/renderedsst2
 wds/vtab/cifar10
@@ -25,7 +24,7 @@ wds/vtab/diabetic_retinopathy
 wds/vtab/dmlab
 wds/vtab/dsprites_label_orientation
 wds/vtab/dsprites_label_x_position
-wds/vtab/dsprites_label_y_position
+wds/vtab/dsprites_label_y_position 
 wds/vtab/pcam
 wds/vtab/smallnorb_label_azimuth
 wds/vtab/smallnorb_label_elevation

@@ -1,0 +1,1 @@
+{"dataset": "wds/vtab/smallnorb_label_elevation", "model": "mobileclip_s1", "pretrained": "laion400m_e32", "task": "zeroshot_classification", "metrics": {"acc1": 0.11226337448559671, "acc5": 0.5568724279835391, "mean_per_class_recall": 0.1111111111111111}, "language": "en", "fps_info": {"image_encoder_fps": 870.0380758961703, "text_encoder_fps": 4546.772519572075}}

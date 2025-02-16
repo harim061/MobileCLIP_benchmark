@@ -1,1 +1,0 @@
-{"dataset": "wds/vtab/clevr_closest_object_distance", "model": "mobileclip_s1", "pretrained": "laion400m_e32", "task": "zeroshot_classification", "metrics": {"acc1": 0.158, "acc5": 0.7549333333333333, "mean_per_class_recall": 0.16666666666666666}, "language": "en", "fps_info": {"image_encoder_fps": 876.952076357428, "text_encoder_fps": 4572.545167762405}}

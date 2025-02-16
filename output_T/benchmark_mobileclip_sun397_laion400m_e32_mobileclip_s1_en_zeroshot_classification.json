@@ -1,0 +1,1 @@
+{"dataset": "wds/sun397", "model": "mobileclip_s1", "pretrained": "laion400m_e32", "task": "zeroshot_classification", "metrics": {"acc1": 0.0029792007650293324, "acc5": 0.02142449932876032, "mean_per_class_recall": 0.0025188916876574307}, "language": "en", "fps_info": {"image_encoder_fps": 873.7085647550622, "text_encoder_fps": 4587.075417425256}}
